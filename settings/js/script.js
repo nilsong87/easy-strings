@@ -56,52 +56,69 @@ const AppState = {
     }
 };
 
-// Inicialização quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', initApp);
+// =============================================================================
+// FUNÇÕES AUXILIARES SEGURAS
+// =============================================================================
 
-function initApp() {
-    // Inicializar AOS para animações de scroll se disponível
-    if (typeof AOS !== 'undefined') {
-        AOS.init({
-            duration: 800,
-            easing: 'ease-in-out',
-            once: true
-        });
+// Função segura para verificar e adicionar event listeners
+function safeAddEventListener(selector, event, handler) {
+    const element = document.querySelector(selector);
+    if (element && typeof handler === 'function') {
+        element.addEventListener(event, handler);
+        return true;
     }
+    console.warn(`Não foi possível adicionar evento a: ${selector}`);
+    return false;
+}
 
-    // Configurar todos os módulos apenas se os elementos existirem
-    try {
-        if (document.getElementById('fretboard')) setupFretboard();
-        if (document.querySelector('.back-to-top')) setupBackToTop();
-        if (document.querySelector('.quiz-option')) setupQuiz();
-        if (document.getElementById('metronome-toggle')) setupMetronome();
-        if (document.querySelector('.instrument-btn')) setupInstrumentSelector();
-        if (document.getElementById('rhythm-grid')) setupRhythmGrid();
-        if (document.querySelector('.tone-circle')) setupCircleOfFifths();
-        if (document.querySelector('.sequence-note')) setupNoteSequence();
-        if (document.querySelector('.game-option')) setupIntervalTraining();
-        if (document.getElementById('chord-select')) setupChordDiagram();
-        if (document.getElementById('generate-progression')) setupProgressionGenerator();
-        
-        // Inicializar jogos
-        if (document.getElementById('new-note')) setupNoteIdentificationGame();
-        if (document.querySelector('.tuning-container')) setupTuningReferences();
-        
-        // Adicionar event listeners para tocar notas no braço
-        document.querySelectorAll('.note').forEach(note => {
-            note.addEventListener('click', function() {
-                const frequency = parseFloat(this.dataset.frequency);
-                if (!isNaN(frequency)) {
-                    playTone(frequency, 0.5);
-                }
-            });
-        });
-    } catch (error) {
-        console.error('Erro na inicialização:', error);
+// Função segura para inicializar componentes
+function safeInitializeComponent(selector, initFunction) {
+    const element = document.querySelector(selector);
+    if (element && typeof initFunction === 'function') {
+        try {
+            initFunction();
+            return true;
+        } catch (error) {
+            console.error(`Erro ao inicializar ${selector}:`, error);
+        }
     }
-    
-    // Inicializações estendidas
-    extendedInit();
+    return false;
+}
+
+// Função para verificar se um elemento existe antes de manipulá-lo
+function safeQuerySelector(selector) {
+    const element = document.querySelector(selector);
+    if (!element) {
+        console.warn(`Elemento não encontrado: ${selector}`);
+    }
+    return element;
+}
+
+// Função para debounce (evitar múltiplas execuções)
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Função para throttle (limitar execuções por tempo)
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
 }
 
 // =============================================================================
@@ -173,22 +190,14 @@ function playMetronomeClick() {
 function setupFretboard() {
     generateFretboard();
 
-    // Configurar eventos dos botões
-    const showNotesBtn = document.getElementById('show-notes');
-    const showCMajorBtn = document.getElementById('show-c-major');
-    const showAMinorBtn = document.getElementById('show-a-minor');
-    const showPentatonicBtn = document.getElementById('show-pentatonic');
-    const clearBoardBtn = document.getElementById('clear-board');
-    const playNoteBtn = document.getElementById('play-note');
-    const playScaleBtn = document.getElementById('play-scale');
-
-    if (showNotesBtn) showNotesBtn.addEventListener('click', toggleAllNotes);
-    if (showCMajorBtn) showCMajorBtn.addEventListener('click', () => showScale('C major'));
-    if (showAMinorBtn) showAMinorBtn.addEventListener('click', () => showChord('A minor'));
-    if (showPentatonicBtn) showPentatonicBtn.addEventListener('click', () => showScale('A minor pentatonic'));
-    if (clearBoardBtn) clearBoardBtn.addEventListener('click', clearFretboard);
-    if (playNoteBtn) playNoteBtn.addEventListener('click', playCurrentNote);
-    if (playScaleBtn) playScaleBtn.addEventListener('click', playCurrentScale);
+    // Configurar eventos dos botões de forma segura
+    safeAddEventListener('#show-notes', 'click', toggleAllNotes);
+    safeAddEventListener('#show-c-major', 'click', () => showScale('C major'));
+    safeAddEventListener('#show-a-minor', 'click', () => showChord('A minor'));
+    safeAddEventListener('#show-pentatonic', 'click', () => showScale('A minor pentatonic'));
+    safeAddEventListener('#clear-board', 'click', clearFretboard);
+    safeAddEventListener('#play-note', 'click', playCurrentNote);
+    safeAddEventListener('#play-scale', 'click', playCurrentScale);
 }
 
 function generateFretboard() {
@@ -523,7 +532,6 @@ function setupInstrumentSelector() {
         });
     }
 
-    // Adicione também os botões visuais se ainda quiser mantê-los
     if (instrumentButtons.length) {
         instrumentButtons.forEach(button => {
             button.addEventListener('click', function() {
@@ -531,7 +539,6 @@ function setupInstrumentSelector() {
                 this.classList.add('active');
                 const instrument = this.dataset.instrument;
                 changeInstrument(instrument);
-                // Sincronize com o select
                 if (instrumentSelect) {
                     instrumentSelect.value = instrument;
                 }
@@ -638,7 +645,6 @@ function setupCircleOfFifths() {
 
     // Função para mostrar a armadura de clave e escalas relacionadas
     function showKeySignatureAndScales(note) {
-        // Mapeamento de notas para armaduras de clave
         const keySignatures = {
             'C': { major: 'C Maior', sharps: 0, flats: 0, relativeMinor: 'Am' },
             'G': { major: 'G Maior', sharps: 1, flats: 0, relativeMinor: 'Em' },
@@ -657,7 +663,6 @@ function setupCircleOfFifths() {
             'Cb': { major: 'Cb Maior', sharps: 0, flats: 7, relativeMinor: 'Abm' }
         };
 
-        // Verificar se a nota existe no mapeamento
         if (!keySignatures[note]) {
             alert(`Nota ${note} selecionada. Informações não disponíveis.`);
             return;
@@ -665,7 +670,6 @@ function setupCircleOfFifths() {
 
         const keyInfo = keySignatures[note];
 
-        // Criar conteúdo informativo
         let infoContent = `
         <h4>${keyInfo.major}</h4>
         <p><strong>Armadura de Clave:</strong> `;
@@ -688,7 +692,6 @@ function setupCircleOfFifths() {
         <p>${getChordsInKey(note)}</p>
     `;
 
-        // Criar ou atualizar modal de informações
         let infoModal = document.getElementById('circle-of-fifths-modal');
         if (!infoModal) {
             infoModal = document.createElement('div');
@@ -707,37 +710,17 @@ function setupCircleOfFifths() {
             max-height: 80vh;
             overflow-y: auto;
         `;
-
-            const closeButton = document.createElement('button');
-            closeButton.textContent = 'Fechar';
-            closeButton.style.cssText = `
-            margin-top: 15px;
-            padding: 8px 16px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        `;
-            closeButton.onclick = function () {
-                document.body.removeChild(infoModal);
-                const overlay = document.getElementById('modal-overlay');
-                if (overlay) document.body.removeChild(overlay);
-            };
-
-            infoModal.appendChild(closeButton);
             document.body.appendChild(infoModal);
         }
 
         infoModal.innerHTML = infoContent;
 
-        // Adicionar botão de fechar
         const closeButton = document.createElement('button');
         closeButton.textContent = 'Fechar';
         closeButton.style.cssText = `
         margin-top: 15px;
         padding: 8px 16px;
-        background: var(--primary);
+        background: #3498db;
         color: white;
         border: none;
         border-radius: 5px;
@@ -750,7 +733,6 @@ function setupCircleOfFifths() {
         };
         infoModal.appendChild(closeButton);
 
-        // Adicionar overlay escuro
         let overlay = document.getElementById('modal-overlay');
         if (!overlay) {
             overlay = document.createElement('div');
@@ -772,9 +754,8 @@ function setupCircleOfFifths() {
         }
     }
 
-    // Função para obter a escala maior
     function getMajorScale(tonic) {
-        const scalePattern = [0, 2, 4, 5, 7, 9, 11]; // T-T-S-T-T-T-S
+        const scalePattern = [0, 2, 4, 5, 7, 9, 11];
         const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
         const tonicIndex = notes.indexOf(tonic);
@@ -787,17 +768,15 @@ function setupCircleOfFifths() {
         return scale.join(' - ');
     }
 
-    // Função para obter a escala menor natural
     function getNaturalMinorScale(tonic) {
-        // Encontrar a menor relativa (3 semitons abaixo)
         const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         const tonicIndex = notes.indexOf(tonic);
         if (tonicIndex === -1) return "Não disponível";
 
-        const minorTonicIndex = (tonicIndex + 9) % 12; // 3 semitons acima = 9 semitons abaixo
+        const minorTonicIndex = (tonicIndex + 9) % 12;
         const minorTonic = notes[minorTonicIndex];
 
-        const scalePattern = [0, 2, 3, 5, 7, 8, 10]; // T-S-T-T-S-T-T
+        const scalePattern = [0, 2, 3, 5, 7, 8, 10];
         const scale = scalePattern.map(interval =>
             notes[(minorTonicIndex + interval) % 12]
         );
@@ -805,7 +784,6 @@ function setupCircleOfFifths() {
         return scale.join(' - ');
     }
 
-    // Função para obter os acordes da tonalidade
     function getChordsInKey(tonic) {
         const chordQualities = ['Maior', 'Menor', 'Menor', 'Maior', 'Maior', 'Menor', 'Diminuto'];
         const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -813,7 +791,6 @@ function setupCircleOfFifths() {
         const tonicIndex = notes.indexOf(tonic);
         if (tonicIndex === -1) return "Não disponível";
 
-        // Padrão de intervalos para escala maior
         const intervals = [0, 2, 4, 5, 7, 9, 11];
         const chords = intervals.map((interval, i) => {
             const note = notes[(tonicIndex + interval) % 12];
@@ -823,7 +800,6 @@ function setupCircleOfFifths() {
         return chords.join(', ');
     }
 
-    // Adicionar estilos CSS para o modal
     const style = document.createElement('style');
     style.textContent = `
     .circle-note {
@@ -837,12 +813,12 @@ function setupCircleOfFifths() {
     }
     
     #circle-of-fifths-modal h4 {
-        color: var(--primary);
+        color: #3498db;
         margin-bottom: 15px;
     }
     
     #circle-of-fifths-modal h5 {
-        color: var(--secondary);
+        color: #2ecc71;
         margin-top: 15px;
         margin-bottom: 5px;
     }
@@ -866,15 +842,12 @@ function setupNoteSequence() {
     
     if (!sequenceNotes.length || !playSequenceBtn || !repeatSequenceBtn) return;
 
-    // Adicionar evento de clique a cada nota
     sequenceNotes.forEach(note => {
         note.addEventListener('click', handleSequenceNoteClick);
     });
 
-    // Configurar botão de reproduzir sequência
     playSequenceBtn.addEventListener('click', generateNewSequence);
 
-    // Configurar botão de repetir sequência
     repeatSequenceBtn.addEventListener('click', function () {
         if (AppState.games.noteSequence.currentSequence.length > 0) {
             playSequence();
@@ -891,7 +864,6 @@ function handleSequenceNoteClick() {
     AppState.games.noteSequence.userSequence.push(noteValue);
     this.classList.add('note-playing');
 
-    // Tocar a nota
     const frequency = calculateFrequency(noteValue, 0);
     if (!isNaN(frequency)) {
         playTone(frequency, 0.3);
@@ -901,7 +873,6 @@ function handleSequenceNoteClick() {
         this.classList.remove('note-playing');
     }, 500);
 
-    // Verificar se o usuário completou a sequência
     if (AppState.games.noteSequence.userSequence.length === AppState.games.noteSequence.currentSequence.length) {
         checkSequence();
     }
@@ -911,7 +882,6 @@ function generateNewSequence() {
     AppState.games.noteSequence.currentSequence = [];
     AppState.games.noteSequence.userSequence = [];
 
-    // Gerar 4-7 notas aleatórias
     const length = Math.floor(Math.random() * 4) + 4;
     for (let i = 0; i < length; i++) {
         const sequenceNotes = document.querySelectorAll('.sequence-note');
@@ -940,7 +910,6 @@ function playSequence() {
             if (noteElement) {
                 noteElement.classList.add('note-playing');
 
-                // Tocar a nota
                 const frequency = calculateFrequency(note, 0);
                 if (!isNaN(frequency)) {
                     playTone(frequency, 0.3);
@@ -992,17 +961,12 @@ function setupIntervalTraining() {
     
     if (!intervalOptions.length || !playIntervalBtn) return;
 
-    // Adicionar evento de clique ao botão de reproduzir intervalo
     playIntervalBtn.addEventListener('click', function () {
-        // Selecionar um intervalo aleatório
         const intervals = Object.keys(CONFIG.INTERVALS);
         AppState.games.intervalTraining.currentInterval = intervals[Math.floor(Math.random() * intervals.length)];
-
-        // Reproduzir o intervalo
         playInterval(AppState.games.intervalTraining.currentInterval);
     });
 
-    // Adicionar evento de clique às opções de intervalo
     intervalOptions.forEach(option => {
         option.addEventListener('click', function () {
             if (AppState.games.intervalTraining.currentInterval === '') {
@@ -1033,7 +997,6 @@ function playInterval(interval) {
     const audioContext = getAudioContext();
     const frequencies = CONFIG.INTERVALS[interval].freqs;
 
-    // Criar dois osciladores para as duas notas
     const oscillator1 = audioContext.createOscillator();
     const oscillator2 = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -1069,7 +1032,6 @@ function setupChordDiagram() {
     
     if (!chordSelect || !playChordBtn) return;
     
-    // Preencher o select com opções de acordes
     const chords = ['C', 'Cm', 'C7', 'Cmaj7', 'G', 'D', 'A', 'E'];
     chords.forEach(chord => {
         const option = document.createElement('option');
@@ -1078,15 +1040,12 @@ function setupChordDiagram() {
         chordSelect.appendChild(option);
     });
 
-    // Atualizar diagrama de acorde quando a seleção mudar
     chordSelect.addEventListener('change', function() {
         updateChordDiagram(this.value);
     });
 
-    // Atualização inicial
     updateChordDiagram(chordSelect.value);
 
-    // Configurar botão de tocar acorde
     playChordBtn.addEventListener('click', function() {
         const selectedChord = chordSelect.value;
         playChord(selectedChord);
@@ -1121,11 +1080,10 @@ function updateChordDiagram(chord) {
 
     const neckWidth = 180;
     const neckHeight = 200;
-    const stringSpacing = neckWidth / (6 - 1); // 6 cordas → 5 espaços
-    const fretSpacing = neckHeight / 4;        // 4 trastes → 4 espaços
+    const stringSpacing = neckWidth / (6 - 1);
+    const fretSpacing = neckHeight / 4;
     const fingerSize = 26;
 
-    // Cordas
     for (let i = 0; i < 6; i++) {
         const string = document.createElement('div');
         string.className = 'string';
@@ -1133,7 +1091,6 @@ function updateChordDiagram(chord) {
         neck.appendChild(string);
     }
 
-    // Trastes
     for (let i = 0; i <= 4; i++) {
         const fret = document.createElement('div');
         fret.className = 'fret';
@@ -1141,7 +1098,6 @@ function updateChordDiagram(chord) {
         neck.appendChild(fret);
     }
 
-    // Dedos
     chordConfig.frets.forEach((fret, i) => {
         if (fret > 0) {
             const finger = document.createElement('div');
@@ -1153,7 +1109,6 @@ function updateChordDiagram(chord) {
         }
     });
 
-    // Marcadores O e X
     chordConfig.frets.forEach((fret, i) => {
         if (fret === 0 || chordConfig.fingers[i] === 'x') {
             const marker = document.createElement('div');
@@ -1166,7 +1121,6 @@ function updateChordDiagram(chord) {
         }
     });
 
-    // Nome do acorde
     const chordName = document.createElement('div');
     chordName.className = 'chord-name';
     chordName.textContent = chord;
@@ -1178,32 +1132,28 @@ function updateChordDiagram(chord) {
 function playChord(chord) {
     const audioContext = getAudioContext();
 
-    // Frequências dos acordes (em Hz)
     const chordFrequencies = {
-        'C': [261.63, 329.63, 392.00],        // C, E, G
-        'Cm': [261.63, 311.13, 392.00],       // C, D#, G
-        'C7': [261.63, 329.63, 392.00, 466.16], // C, E, G, A#
-        'Cmaj7': [261.63, 329.63, 392.00, 523.25], // C, E, G, B
-        'G': [392.00, 493.88, 587.33],        // G, B, D
-        'D': [293.66, 369.99, 440.00],        // D, F#, A
-        'A': [440.00, 554.37, 659.25],        // A, C#, E
-        'E': [329.63, 415.30, 493.88]         // E, G#, B
+        'C': [261.63, 329.63, 392.00],
+        'Cm': [261.63, 311.13, 392.00],
+        'C7': [261.63, 329.63, 392.00, 466.16],
+        'Cmaj7': [261.63, 329.63, 392.00, 523.25],
+        'G': [392.00, 493.88, 587.33],
+        'D': [293.66, 369.99, 440.00],
+        'A': [440.00, 554.37, 659.25],
+        'E': [329.63, 415.30, 493.88]
     };
 
     const frequencies = chordFrequencies[chord] || chordFrequencies['C'];
 
-    // Criar ganho principal
     const gainNode = audioContext.createGain();
     gainNode.gain.value = 0.2;
     gainNode.connect(audioContext.destination);
 
-    // Criar osciladores para cada frequência do acorde
     frequencies.forEach((freq, index) => {
         const oscillator = audioContext.createOscillator();
         oscillator.type = 'sine';
         oscillator.frequency.value = freq;
         
-        // Adicionar pequeno atraso para criar efeito de arpejo
         const delay = audioContext.createDelay();
         delay.delayTime.value = index * 0.05;
         
@@ -1212,13 +1162,11 @@ function playChord(chord) {
         
         oscillator.start();
         
-        // Parar o oscilador após 1.5 segundos
         setTimeout(() => {
             oscillator.stop();
         }, 1500);
     });
 
-    // Fade out suave
     gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 1.5);
 }
 
@@ -1233,7 +1181,6 @@ function setupProgressionGenerator() {
     
     if (!generateButton || !styleSelect || !lengthSelect) return;
 
-    // Preencher selects com opções
     const styles = ['pop', 'rock', 'jazz', 'blues', 'classical'];
     const lengths = [4, 8, 12, 16];
     
@@ -1255,22 +1202,18 @@ function setupProgressionGenerator() {
         const style = styleSelect.value;
         const length = parseInt(lengthSelect.value);
         
-        // Gerar progressão com base no estilo e comprimento
         const progression = generateChordProgression(style, length);
         
-        // Exibir progressão
         const progressionDisplay = document.querySelector('.chord-progression');
         if (progressionDisplay) {
             progressionDisplay.textContent = progression.join(' - ');
         }
         
-        // Adicionar botão para tocar progressão
         addPlayProgressionButton(progression);
     });
 }
 
 function generateChordProgression(style, length) {
-    // Progressões básicas para diferentes estilos
     const progressions = {
         pop: [
             ['C', 'G', 'Am', 'F'],
@@ -1302,11 +1245,9 @@ function generateChordProgression(style, length) {
         ]
     };
 
-    // Selecionar uma progressão aleatória do estilo escolhido
     const styleProgressions = progressions[style];
     const randomProgression = styleProgressions[Math.floor(Math.random() * styleProgressions.length)];
 
-    // Se a progressão selecionada for mais curta que a solicitada, repeti-la
     if (randomProgression.length < length) {
         const repeatedProgression = [];
         for (let i = 0; i < length; i++) {
@@ -1315,7 +1256,6 @@ function generateChordProgression(style, length) {
         return repeatedProgression;
     }
 
-    // Se a progressão selecionada for mais longa que a solicitada, truncá-la
     if (randomProgression.length > length) {
         return randomProgression.slice(0, length);
     }
@@ -1324,7 +1264,6 @@ function generateChordProgression(style, length) {
 }
 
 function addPlayProgressionButton(progression) {
-    // Remover botão anterior se existir
     const oldButton = document.getElementById('play-progression');
     if (oldButton) {
         oldButton.remove();
@@ -1347,21 +1286,19 @@ function addPlayProgressionButton(progression) {
 
 function playChordProgression(progression) {
     const audioContext = getAudioContext();
-    const bpm = 120; // Batidas por minuto
-    const chordDuration = 60 / bpm * 2; // 2 batidas por acorde
+    const bpm = 120;
+    const chordDuration = 60 / bpm * 2;
 
     progression.forEach((chord, index) => {
         setTimeout(() => {
             playChord(chord);
             
-            // Destacar o acorde atual na exibição
             const progressionText = document.querySelector('.chord-progression');
             if (progressionText) {
                 const chords = progressionText.textContent.split(' - ');
                 chords[index] = `<strong>${chords[index]}</strong>`;
                 progressionText.innerHTML = chords.join(' - ');
                 
-                // Remover destaque após um tempo
                 setTimeout(() => {
                     progressionText.textContent = progression.join(' - ');
                 }, chordDuration * 1000 / 2);
@@ -1381,37 +1318,30 @@ function setupNoteIdentificationGame() {
     
     if (!newNoteButton || !scoreElement) return;
 
-    // Inicializar pontuação
     AppState.games.noteIdentification.score = 0;
     scoreElement.textContent = '0';
 
     newNoteButton.addEventListener('click', generateNewNote);
 
-    // Adicionar event listener a todas as notas no braço
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('note') && AppState.games.noteIdentification.currentNote !== '') {
             const selectedNote = e.target.dataset.note;
             
             if (selectedNote === AppState.games.noteIdentification.currentNote) {
-                // Resposta correta
                 AppState.games.noteIdentification.score += 5;
                 scoreElement.textContent = AppState.games.noteIdentification.score;
                 
-                // Feedback visual
                 showGameFeedback('Correto! +5 pontos', 'success');
                 generateNewNote();
             } else {
-                // Resposta errada
                 AppState.games.noteIdentification.score = Math.max(0, AppState.games.noteIdentification.score - 2);
                 scoreElement.textContent = AppState.games.noteIdentification.score;
                 
-                // Feedback visual
                 showGameFeedback(`Incorreto. A nota era ${AppState.games.noteIdentification.currentNote}. -2 pontos`, 'error');
             }
         }
     });
 
-    // Iniciar com uma nota
     generateNewNote();
 }
 
@@ -1426,7 +1356,6 @@ function generateNewNote() {
 }
 
 function showGameFeedback(message, type) {
-    // Remover feedback anterior
     const oldFeedback = document.getElementById('game-feedback');
     if (oldFeedback) {
         oldFeedback.remove();
@@ -1450,7 +1379,6 @@ function showGameFeedback(message, type) {
     
     document.body.appendChild(feedback);
     
-    // Remover após 2 segundos
     setTimeout(() => {
         if (document.body.contains(feedback)) {
             document.body.removeChild(feedback);
@@ -1465,16 +1393,13 @@ function showGameFeedback(message, type) {
 function setupTuningReferences() {
     const tuningContainer = document.querySelector('.tuning-container');
     
-    // Verificar se o container existe antes de manipular
     if (!tuningContainer) {
         console.warn('Elemento .tuning-container não encontrado no DOM');
         return;
     }
     
-    // Limpar container existente
     tuningContainer.innerHTML = '';
     
-    // Afinações padrão para diferentes instrumentos
     const tunings = {
         'Violão': ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
         'Baixo': ['E1', 'A1', 'D2', 'G2'],
@@ -1483,7 +1408,6 @@ function setupTuningReferences() {
         'Ukulele': ['G4', 'C4', 'E4', 'A4']
     };
 
-    // Criar botões para cada nota de afinação
     Object.entries(tunings).forEach(([instrument, notes]) => {
         const instrumentSection = document.createElement('div');
         instrumentSection.className = 'tuning-section mb-4';
@@ -1501,7 +1425,6 @@ function setupTuningReferences() {
             button.addEventListener('click', function() {
                 playTuningNote(note);
                 
-                // Feedback visual
                 this.classList.add('btn-primary');
                 this.classList.remove('btn-outline-primary');
                 
@@ -1520,7 +1443,6 @@ function setupTuningReferences() {
 }
 
 function playTuningNote(note) {
-    // Mapeamento de notas para frequências (em Hz)
     const noteFrequencies = {
         'E1': 41.20, 'A1': 55.00, 'D2': 73.42, 'G2': 98.00,
         'E2': 82.41, 'A2': 110.00, 'D3': 146.83, 'G3': 196.00,
@@ -1534,139 +1456,101 @@ function playTuningNote(note) {
 }
 
 // =============================================================================
-// FUNÇÕES AUXILIARES E DE UTILIDADE
+// INICIALIZAÇÃO COMPLETA
 // =============================================================================
 
-// Função para verificar se um elemento existe antes de manipulá-lo
-function safeQuerySelector(selector) {
-    const element = document.querySelector(selector);
-    if (!element) {
-        console.warn(`Elemento não encontrado: ${selector}`);
-    }
-    return element;
-}
-
-// Função para adicionar evento seguro (verifica se o elemento existe)
-function addSafeEventListener(selector, event, handler) {
-    const element = document.querySelector(selector);
-    if (element) {
-        element.addEventListener(event, handler);
-    } else {
-        console.warn(`Não foi possível adicionar evento: ${selector} não encontrado`);
-    }
-}
-
-// Função para debounce (evitar múltiplas execuções)
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Função para throttle (limitar execuções por tempo)
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    }
-}
-
-// =============================================================================
-// MANIPULAÇÃO DE ERROS GLOBAIS
-// =============================================================================
-
-// Capturar erros não tratados
-window.addEventListener('error', function(e) {
-    console.error('Erro não tratado:', e.error);
+// Função de inicialização estendida
+function extendedInit() {
+    setupResponsiveLayout();
+    setupIntersectionObserver();
+    setupAnimations();
+    addVisualFeedback();
+    setupDataPersistence();
+    setupAccessibility();
+    setupConnectionMonitoring();
+    setupThemeManager();
+    setupFormValidation();
+    setupLazyLoading();
     
-    // Exibir mensagem amigável para o usuário
-    const errorDisplay = document.getElementById('error-display');
-    if (!errorDisplay) {
-        const errorDiv = document.createElement('div');
-        errorDiv.id = 'error-display';
-        errorDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #e74c3c;
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            z-index: 9999;
-            max-width: 300px;
-        `;
-        errorDiv.innerHTML = `
-            <strong>Ocorreu um erro</strong>
-            <p>Recarregue a página ou tente novamente mais tarde.</p>
-            <button onclick="this.parentElement.style.display='none'" 
-                    style="background: white; color: #e74c3c; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-                Fechar
-            </button>
-        `;
-        document.body.appendChild(errorDiv);
+    if (!window.AudioContext && !window.webkitAudioContext) {
+        showBrowserWarning();
     }
-});
+}
 
-// =============================================================================
-// OTIMIZAÇÕES DE PERFORMANCE
-// =============================================================================
+function safeExtendedInit() {
+    try {
+        extendedInit();
+    } catch (error) {
+        console.error('Erro na inicialização estendida:', error);
+    }
+}
 
-// Observer para elementos que entram/saem da viewport
 function setupIntersectionObserver() {
-    if (!('IntersectionObserver' in window)) return;
+    if (!('IntersectionObserver' in window)) {
+        console.warn('IntersectionObserver não suportado neste navegador');
+        return;
+    }
     
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('in-viewport');
-                // Carregar recursos sob demanda
-                if (entry.target.dataset.lazyLoad) {
-                    loadLazyContent(entry.target);
+    const lazyElements = document.querySelectorAll('[data-lazy]');
+    if (lazyElements.length === 0) return;
+    
+    try {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-viewport');
+                    if (entry.target.dataset.lazyLoad) {
+                        loadLazyContent(entry.target);
+                    }
                 }
-            }
-        });
-    }, { threshold: 0.1 });
+            });
+        }, { threshold: 0.1 });
 
-    // Observar elementos com atributo data-lazy
-    document.querySelectorAll('[data-lazy]').forEach(el => {
-        observer.observe(el);
-    });
+        lazyElements.forEach(el => {
+            observer.observe(el);
+        });
+    } catch (error) {
+        console.error('Erro no IntersectionObserver:', error);
+    }
 }
 
 function loadLazyContent(element) {
     const src = element.dataset.lazyLoad;
     if (src && !element.dataset.loaded) {
         element.dataset.loaded = true;
-        // Carregar conteúdo lazy
         if (element.tagName === 'IMG') {
             element.src = src;
         }
     }
 }
 
-// =============================================================================
-// RESPONSIVIDADE E AJUSTES DE LAYOUT
-// =============================================================================
+function setupConnectionMonitoring() {
+    const statusElement = document.getElementById('connection-status');
+    if (!statusElement) return;
+    
+    function updateConnectionStatus() {
+        const isOnline = navigator.onLine;
+        
+        if (isOnline) {
+            statusElement.style.display = 'none';
+        } else {
+            statusElement.style.display = 'block';
+            statusElement.textContent = '⚠️ Você está offline. Algumas funcionalidades podem não estar disponíveis.';
+        }
+        
+        document.body.classList.toggle('offline', !isOnline);
+    }
+
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    updateConnectionStatus();
+}
 
 function setupResponsiveLayout() {
-    // Ajustar layout baseado no tamanho da tela
     function handleResize() {
         const isMobile = window.innerWidth < 768;
         document.body.classList.toggle('mobile-view', isMobile);
         
-        // Ajustes específicos para mobile
         if (isMobile) {
             adjustForMobile();
         } else {
@@ -1674,19 +1558,16 @@ function setupResponsiveLayout() {
         }
     }
 
-    // Debounce para redimensionamento
     window.addEventListener('resize', debounce(handleResize, 250));
-    handleResize(); // Executar inicialmente
+    handleResize();
 }
 
 function adjustForMobile() {
-    // Simplificar interface para mobile
     const complexElements = document.querySelectorAll('.desktop-only');
     complexElements.forEach(el => {
         el.style.display = 'none';
     });
     
-    // Ajustar tamanho de botões para toque
     const touchElements = document.querySelectorAll('button, .btn, .note');
     touchElements.forEach(el => {
         el.style.minHeight = '44px';
@@ -1695,19 +1576,13 @@ function adjustForMobile() {
 }
 
 function adjustForDesktop() {
-    // Restaurar elementos ocultos no mobile
     const complexElements = document.querySelectorAll('.desktop-only');
     complexElements.forEach(el => {
         el.style.display = '';
     });
 }
 
-// =============================================================================
-// ANIMAÇÕES E FEEDBACK VISUAL
-// =============================================================================
-
 function setupAnimations() {
-    // Animações de entrada suave
     const animatedElements = document.querySelectorAll('.fade-in, .slide-in');
     
     animatedElements.forEach((el, index) => {
@@ -1722,9 +1597,7 @@ function setupAnimations() {
     });
 }
 
-// Feedback visual para interações
 function addVisualFeedback() {
-    // Feedback para cliques
     document.addEventListener('click', function(e) {
         if (e.target.matches('button, .btn, .note, .card')) {
             const element = e.target;
@@ -1736,15 +1609,8 @@ function addVisualFeedback() {
     });
 }
 
-// =============================================================================
-// PERSISTÊNCIA DE DADOS (LOCALSTORAGE)
-// =============================================================================
-
 function setupDataPersistence() {
-    // Salvar estado ao fechar/recarregar
     window.addEventListener('beforeunload', saveAppState);
-    
-    // Carregar estado salvo
     loadAppState();
 }
 
@@ -1769,7 +1635,6 @@ function loadAppState() {
         if (savedState) {
             const state = JSON.parse(savedState);
             
-            // Restaurar instrumento
             if (state.currentInstrument) {
                 AppState.currentInstrument = state.currentInstrument;
                 const instrumentSelect = document.getElementById('instrument-select');
@@ -1782,11 +1647,9 @@ function loadAppState() {
                 }
             }
             
-            // Restaurar pontuações dos jogos
             if (state.games) {
                 Object.assign(AppState.games, state.games);
                 
-                // Atualizar displays de pontuação
                 const noteScore = document.getElementById('note-game-score');
                 if (noteScore) noteScore.textContent = state.games.noteIdentification?.score || '0';
                 
@@ -1794,7 +1657,6 @@ function loadAppState() {
                 if (intervalScore) intervalScore.textContent = state.games.intervalTraining?.score || '0';
             }
             
-            // Restaurar BPM do metrônomo
             if (state.metronome?.bpm) {
                 const bpmSlider = document.getElementById('bpm-slider');
                 const bpmDisplay = document.getElementById('bpm-display');
@@ -1809,23 +1671,17 @@ function loadAppState() {
     }
 }
 
-// =============================================================================
-// ACESSIBILIDADE
-// =============================================================================
-
 function setupAccessibility() {
-    // Suporte a navegação por teclado
     document.addEventListener('keydown', function(e) {
-        // Atalhos de teclado
         switch(e.key) {
-            case ' ': // Espaço - tocar/parar metrônomo
+            case ' ':
                 const metronomeBtn = document.getElementById('metronome-toggle');
                 if (metronomeBtn && document.activeElement !== metronomeBtn) {
                     e.preventDefault();
                     metronomeBtn.click();
                 }
                 break;
-            case 'Escape': // ESC - fechar modais
+            case 'Escape':
                 const modals = document.querySelectorAll('.modal, [role="dialog"]');
                 modals.forEach(modal => {
                     if (modal.style.display !== 'none') {
@@ -1836,7 +1692,6 @@ function setupAccessibility() {
         }
     });
     
-    // Melhorar foco visual
     const focusableElements = document.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
     focusableElements.forEach(el => {
         el.addEventListener('focus', () => {
@@ -1848,348 +1703,10 @@ function setupAccessibility() {
     });
 }
 
-// =============================================================================
-// INICIALIZAÇÃO COMPLETA
-// =============================================================================
-
-// Função de inicialização estendida
-function extendedInit() {
-    // Configurações adicionais
-    setupResponsiveLayout();
-    setupIntersectionObserver();
-    setupAnimations();
-    addVisualFeedback();
-    setupDataPersistence();
-    setupAccessibility();
-    
-    // Verificar suporte a Web Audio API
-    if (!window.AudioContext && !window.webkitAudioContext) {
-        showBrowserWarning();
-    }
-}
-
-function showBrowserWarning() {
-    const warning = document.createElement('div');
-    warning.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: #ff9800;
-        color: white;
-        padding: 10px;
-        text-align: center;
-        z-index: 9999;
-    `;
-    warning.innerHTML = `
-        ⚠️ Seu navegador pode não suportar todas as funcionalidades de áudio. 
-        Recomendamos usar Chrome, Firefox ou Edge para melhor experiência.
-    `;
-    document.body.appendChild(warning);
-}
-
-// Handler para erros não capturados em Promises
-window.addEventListener('unhandledrejection', function(event) {
-    console.error('Promise rejeitada não tratada:', event.reason);
-    event.preventDefault();
-});
-
-// =============================================================================
-// FALLBACKS PARA NAVEGADORES ANTIGOS
-// =============================================================================
-
-// Verificar e avisar sobre navegadores desatualizados
-function checkBrowserCompatibility() {
-    const isIE = /*@cc_on!@*/false || !!document.documentMode;
-    const isOldFirefox = typeof InstallTrigger !== 'undefined' && parseFloat(navigator.userAgent.match(/Firefox\/([0-9]+\.)/)[1]) < 60;
-    
-    if (isIE || isOldFirefox) {
-        showBrowserWarning('Seu navegador não é totalmente compatível. Recomendamos atualizar para uma versão mais recente.');
-    }
-}
-
-function showBrowserWarning(message) {
-    const warning = document.createElement('div');
-    warning.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: #ff9800;
-        color: white;
-        padding: 10px;
-        text-align: center;
-        z-index: 10000;
-        font-weight: bold;
-    `;
-    warning.textContent = message;
-    document.body.appendChild(warning);
-}
-
-// Executar verificação de compatibilidade
-checkBrowserCompatibility();
-
-// =============================================================================
-// POLYFILLS PARA COMPATIBILIDADE
-// =============================================================================
-
-// Polyfill para Element.closest()
-if (!Element.prototype.closest) {
-    Element.prototype.closest = function(s) {
-        var el = this;
-        do {
-            if (el.matches(s)) return el;
-            el = el.parentElement || el.parentNode;
-        } while (el !== null && el.nodeType === 1);
-        return null;
-    };
-}
-
-// Polyfill para NodeList.forEach()
-if (window.NodeList && !NodeList.prototype.forEach) {
-    NodeList.prototype.forEach = Array.prototype.forEach;
-}
-
-// Polyfill para Element.matches()
-if (!Element.prototype.matches) {
-    Element.prototype.matches = 
-        Element.prototype.matchesSelector || 
-        Element.prototype.mozMatchesSelector ||
-        Element.prototype.msMatchesSelector || 
-        Element.prototype.oMatchesSelector || 
-        Element.prototype.webkitMatchesSelector ||
-        function(s) {
-            var matches = (this.document || this.ownerDocument).querySelectorAll(s),
-                i = matches.length;
-            while (--i >= 0 && matches.item(i) !== this) {}
-            return i > -1;            
-        };
-}
-
-// Polyfill para Object.assign (para navegadores mais antigos)
-if (typeof Object.assign !== 'function') {
-    Object.assign = function(target) {
-        'use strict';
-        if (target == null) {
-            throw new TypeError('Cannot convert undefined or null to object');
-        }
-
-        var to = Object(target);
-        
-        for (var index = 1; index < arguments.length; index++) {
-            var nextSource = arguments[index];
-            
-            if (nextSource != null) {
-                for (var nextKey in nextSource) {
-                    if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-                        to[nextKey] = nextSource[nextKey];
-                    }
-                }
-            }
-        }
-        return to;
-    };
-}
-
-// =============================================================================
-// MANIPULAÇÃO DO SERVICE WORKER (PWA)
-// =============================================================================
-
-// Registrar Service Worker para funcionalidade offline
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        // Usar caminho relativo para evitar problemas
-        navigator.serviceWorker.register('./sw.js')
-            .then(function(registration) {
-                console.log('ServiceWorker registrado com sucesso: ', registration.scope);
-                
-                // Verificar se há uma nova versão disponível
-                registration.addEventListener('updatefound', function() {
-                    const newWorker = registration.installing;
-                    console.log('Nova versão do Service Worker encontrada');
-                    
-                    newWorker.addEventListener('statechange', function() {
-                        if (newWorker.state === 'installed') {
-                            console.log('Nova versão instalada. Recarregue para atualizar.');
-                        }
-                    });
-                });
-            })
-            .catch(function(error) {
-                console.log('Falha no registro do ServiceWorker: ', error);
-                // Não mostrar erro para o usuário, a aplicação funciona sem SW
-            });
-    });
-    
-    // Verificar atualizações periodicamente
-    setInterval(function() {
-        if (navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage({type: 'CHECK_UPDATE'});
-        }
-    }, 60 * 60 * 1000); // Verificar a cada hora
-}
-
-// =============================================================================
-// GERENCIAMENTO DE CONEXÃO
-// =============================================================================
-
-// Detectar mudanças no status da conexão
-function setupConnectionMonitoring() {
-    function updateConnectionStatus() {
-        const isOnline = navigator.onLine;
-        const statusElement = document.getElementById('connection-status');
-        
-        if (statusElement) {
-            if (isOnline) {
-                statusElement.style.display = 'none';
-            } else {
-                statusElement.style.display = 'block';
-                statusElement.textContent = '⚠️ Você está offline. Algumas funcionalidades podem não estar disponíveis.';
-            }
-        }
-        
-        // Atualizar estado da aplicação baseado na conectividade
-        document.body.classList.toggle('offline', !isOnline);
-    }
-
-    window.addEventListener('online', updateConnectionStatus);
-    window.addEventListener('offline', updateConnectionStatus);
-    updateConnectionStatus(); // Status inicial
-}
-
-// =============================================================================
-// OTIMIZAÇÕES DE PERFORMANCE AVANÇADAS
-// =============================================================================
-
-// Pré-carregar recursos críticos
-function preloadCriticalResources() {
-    const resources = [
-        // Adicione URLs de recursos críticos aqui
-    ];
-    
-    resources.forEach(resource => {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.href = resource;
-        link.as = 'script'; // ou 'style', 'font', etc.
-        document.head.appendChild(link);
-    });
-}
-
-// Lazy loading para imagens não críticas
-function setupLazyLoading() {
-    const lazyImages = [].slice.call(document.querySelectorAll('img.lazy'));
-    
-    if ('IntersectionObserver' in window) {
-        const lazyImageObserver = new IntersectionObserver(function(entries, observer) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    const lazyImage = entry.target;
-                    lazyImage.src = lazyImage.dataset.src;
-                    lazyImage.classList.remove('lazy');
-                    lazyImageObserver.unobserve(lazyImage);
-                }
-            });
-        });
-
-        lazyImages.forEach(function(lazyImage) {
-            lazyImageObserver.observe(lazyImage);
-        });
-    } else {
-        // Fallback para navegadores sem Intersection Observer
-        lazyImages.forEach(function(lazyImage) {
-            lazyImage.src = lazyImage.dataset.src;
-        });
-    }
-}
-
-// =============================================================================
-// ANÁLISE E MONITORAMENTO
-// =============================================================================
-
-// Funções simples de analytics
-const Analytics = {
-    trackEvent: function(category, action, label) {
-        if (typeof gtag !== 'undefined') {
-            gtag('event', action, {
-                'event_category': category,
-                'event_label': label
-            });
-        }
-        console.log(`Event tracked: ${category} - ${action} - ${label}`);
-    },
-    
-    trackPageView: function(pageName) {
-        if (typeof gtag !== 'undefined') {
-            gtag('config', 'GA_MEASUREMENT_ID', {
-                'page_title': pageName,
-                'page_location': window.location.href
-            });
-        }
-        console.log(`Page view: ${pageName}`);
-    }
-};
-
-// =============================================================================
-// INTERNACIONALIZAÇÃO (i18n)
-// =============================================================================
-
-// Sistema simples de internacionalização
-const I18n = {
-    currentLanguage: 'pt-BR',
-    translations: {
-        'pt-BR': {
-            'play': 'Tocar',
-            'stop': 'Parar',
-            'note': 'Nota',
-            'scale': 'Escala',
-            'chord': 'Acorde'
-            // Adicione mais traduções aqui
-        },
-        'en-US': {
-            'play': 'Play',
-            'stop': 'Stop',
-            'note': 'Note',
-            'scale': 'Scale',
-            'chord': 'Chord'
-        }
-    },
-    
-    t: function(key) {
-        return this.translations[this.currentLanguage][key] || key;
-    },
-    
-    setLanguage: function(language) {
-        if (this.translations[language]) {
-            this.currentLanguage = language;
-            this.updateUI();
-        }
-    },
-    
-    updateUI: function() {
-        // Atualizar todos os elementos com data-i18n
-        document.querySelectorAll('[data-i18n]').forEach(element => {
-            const key = element.getAttribute('data-i18n');
-            element.textContent = this.t(key);
-        });
-        
-        // Atualizar placeholders
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-            const key = element.getAttribute('data-i18n-placeholder');
-            element.placeholder = this.t(key);
-        });
-    }
-};
-
-// =============================================================================
-// GERENCIAMENTO DE TEMA
-// =============================================================================
-
 function setupThemeManager() {
     const themeToggle = document.getElementById('theme-toggle');
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
     
-    // Carregar tema salvo ou usar preferência do sistema
     const savedTheme = localStorage.getItem('theme');
     const systemTheme = prefersDarkScheme.matches ? 'dark' : 'light';
     const currentTheme = savedTheme || systemTheme;
@@ -2206,17 +1723,12 @@ function setupThemeManager() {
         });
     }
     
-    // Observar mudanças na preferência do sistema
     prefersDarkScheme.addEventListener('change', e => {
         if (!localStorage.getItem('theme')) {
             document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
         }
     });
 }
-
-// =============================================================================
-// VALIDAÇÃO DE FORMULÁRIOS
-// =============================================================================
 
 function setupFormValidation() {
     const forms = document.querySelectorAll('form[data-validate]');
@@ -2242,7 +1754,6 @@ function validateForm(form) {
             clearValidationError(input);
         }
         
-        // Validações específicas por tipo
         if (input.type === 'email' && input.value) {
             if (!isValidEmail(input.value)) {
                 showValidationError(input, 'Por favor, insira um email válido');
@@ -2279,115 +1790,153 @@ function clearValidationError(input) {
     input.classList.remove('invalid');
 }
 
-// =============================================================================
-// UTILITÁRIOS DE ÁUDIO AVANÇADOS
-// =============================================================================
+function setupLazyLoading() {
+    const lazyImages = [].slice.call(document.querySelectorAll('img.lazy'));
+    
+    if ('IntersectionObserver' in window) {
+        const lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    const lazyImage = entry.target;
+                    lazyImage.src = lazyImage.dataset.src;
+                    lazyImage.classList.remove('lazy');
+                    lazyImageObserver.unobserve(lazyImage);
+                }
+            });
+        });
 
-// Analisador de espectro para visualização de áudio
-function setupAudioAnalyzer() {
-    const audioContext = getAudioContext();
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
-    
-    return {
-        analyser,
-        connectToSource: function(source) {
-            source.connect(analyser);
-            return analyser;
-        },
-        getFrequencyData: function() {
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(dataArray);
-            return dataArray;
-        },
-        getWaveformData: function() {
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteTimeDomainData(dataArray);
-            return dataArray;
-        }
-    };
-}
-
-// Gerador de ruído para testes de áudio
-function generateNoise(type = 'white', duration = 1.0) {
-    const audioContext = getAudioContext();
-    const bufferSize = 2 * audioContext.sampleRate;
-    const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-    
-    let lastOut = 0.0;
-    
-    for (let i = 0; i < bufferSize; i++) {
-        if (type === 'white') {
-            output[i] = Math.random() * 2 - 1;
-        } else if (type === 'pink') {
-            // Algoritmo de ruído rosa
-            const white = Math.random() * 2 - 1;
-            output[i] = (lastOut + (0.02 * white)) / 1.02;
-            lastOut = output[i];
-            output[i] *= 3.5; // Ajuste de ganho
-        } else if (type === 'brown') {
-            // Algoritmo de ruído marrom
-            const white = Math.random() * 2 - 1;
-            output[i] = (lastOut + (0.02 * white)) / 1.02;
-            lastOut = output[i];
-            output[i] *= 6.0; // Ajuste de ganho
-        }
+        lazyImages.forEach(function(lazyImage) {
+            lazyImageObserver.observe(lazyImage);
+        });
+    } else {
+        lazyImages.forEach(function(lazyImage) {
+            lazyImage.src = lazyImage.dataset.src;
+        });
     }
+}
+
+function showBrowserWarning() {
+    const warning = document.createElement('div');
+    warning.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #ff9800;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        z-index: 9999;
+    `;
+    warning.innerHTML = `
+        ⚠️ Seu navegador pode não suportar todas as funcionalidades de áudio. 
+        Recomendamos usar Chrome, Firefox ou Edge para melhor experiência.
+    `;
+    document.body.appendChild(warning);
+}
+
+function checkBrowserCompatibility() {
+    const isIE = /*@cc_on!@*/false || !!document.documentMode;
+    const isOldFirefox = typeof InstallTrigger !== 'undefined' && parseFloat(navigator.userAgent.match(/Firefox\/([0-9]+\.)/)[1]) < 60;
     
-    const source = audioContext.createBufferSource();
-    source.buffer = noiseBuffer;
-    source.loop = true;
-    
-    const gainNode = audioContext.createGain();
-    source.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    source.start();
-    
-    // Parar após a duração especificada
-    setTimeout(() => {
-        source.stop();
-    }, duration * 1000);
-    
-    return {
-        source,
-        gainNode,
-        stop: function() {
-            source.stop();
-        }
-    };
+    if (isIE || isOldFirefox) {
+        showBrowserWarning('Seu navegador não é totalmente compatível. Recomendamos atualizar para uma versão mais recente.');
+    }
 }
 
 // =============================================================================
-// EXPORTAÇÕES FINAIS E INICIALIZAÇÃO
+// INICIALIZAÇÃO PRINCIPAL
 // =============================================================================
 
-// Exportar utilitários globais
-window.AppUtils = {
-    debounce,
-    throttle,
-    Analytics,
-    I18n,
-    generateNoise,
-    setupAudioAnalyzer
-};
+function initApp() {
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+    }
 
-// Inicialização final quando tudo estiver carregado
-window.addEventListener('load', function() {
-    console.log('Music Trainer totalmente carregado e inicializado');
+    const modules = [
+        { selector: '#fretboard', init: setupFretboard },
+        { selector: '.back-to-top', init: setupBackToTop },
+        { selector: '.quiz-option', init: setupQuiz },
+        { selector: '#metronome-toggle', init: setupMetronome },
+        { selector: '.instrument-btn', init: setupInstrumentSelector },
+        { selector: '#rhythm-grid', init: setupRhythmGrid },
+        { selector: '.tone-circle', init: setupCircleOfFifths },
+        { selector: '.sequence-note', init: setupNoteSequence },
+        { selector: '.game-option', init: setupIntervalTraining },
+        { selector: '#chord-select', init: setupChordDiagram },
+        { selector: '#generate-progression', init: setupProgressionGenerator },
+        { selector: '#new-note', init: setupNoteIdentificationGame },
+        { selector: '.tuning-container', init: setupTuningReferences }
+    ];
+
+    modules.forEach(module => {
+        safeInitializeComponent(module.selector, module.init);
+    });
     
-    // Rastrear página inicial
-    Analytics.trackPageView('Página Inicial');
-    
-    // Verificar performance
-    if ('performance' in window) {
-        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-        console.log(`Tempo de carregamento: ${loadTime}ms`);
-        
-        if (loadTime > 3000) {
-            console.warn('Tempo de carregamento lento. Considere otimizar recursos.');
+    setTimeout(() => {
+        const notes = document.querySelectorAll('.note');
+        notes.forEach(note => {
+            note.addEventListener('click', function() {
+                const frequency = parseFloat(this.dataset.frequency);
+                if (!isNaN(frequency)) {
+                    playTone(frequency, 0.5);
+                }
+            });
+        });
+    }, 500);
+}
+
+// Inicialização quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            initApp();
+            safeExtendedInit();
+        } catch (error) {
+            console.error('Erro na inicialização:', error);
         }
+    });
+} else {
+    try {
+        initApp();
+        safeExtendedInit();
+    } catch (error) {
+        console.error('Erro na inicialização:', error);
+    }
+}
+
+// Handler para erros não capturados
+window.addEventListener('error', function(e) {
+    console.error('Erro não tratado:', e.error);
+    
+    const errorDisplay = document.getElementById('error-display');
+    if (!errorDisplay) {
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'error-display';
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 9999;
+            max-width: 300px;
+        `;
+        errorDiv.innerHTML = `
+            <strong>Ocorreu um erro</strong>
+            <p>Recarregue a página ou tente novamente mais tarde.</p>
+            <button onclick="this.parentElement.style.display='none'" 
+                    style="background: white; color: #e74c3c; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+                Fechar
+            </button>
+        `;
+        document.body.appendChild(errorDiv);
     }
 });
 
@@ -2396,3 +1945,6 @@ window.addEventListener('unhandledrejection', function(event) {
     console.error('Promise rejeitada não tratada:', event.reason);
     event.preventDefault();
 });
+
+// Verificação de compatibilidade
+checkBrowserCompatibility();

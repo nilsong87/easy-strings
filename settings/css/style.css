@@ -348,17 +348,6 @@ body {
     transform: scale(1.1);
 }
 
-.chord-diagram {
-    height: 320px;
-    background-color: #fff;
-    border-radius: 8px;
-    margin: 20px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: var(--shadow);
-    position: relative;
-}
 
 .tuning-reference {
     display: flex;
