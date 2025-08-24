@@ -1,0 +1,21 @@
+{
+  "name": "MusicLearn - Aprendizado Musical",
+  "short_name": "MusicLearn",
+  "description": "Aprenda música de forma interativa e divertida",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2c3e50",
+  "theme_color": "#3498db",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

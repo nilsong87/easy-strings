@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta name="theme-color" content="#2c3e50"> -->
+    <title>Easy Strings - Aplicativo de Aprendizado Musical</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="/settings/css/style.css">
+    <!-- <link rel="manifest" href="manifest.json"> -->
+
+
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-guitar me-2"></i>Easy Strings
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Início</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#fretboard">Braço</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#theory">Teoria</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#practice">Prática</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#games">Jogos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#tools">Ferramentas</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h1 data-aos="fade-down">Aprenda Música de Forma Interativa</h1>
+            <p data-aos="fade-down" data-aos-delay="200">Explore teoria musical, pratique instrumentos e divirta-se
+                aprendendo</p>
+            <a href="#fretboard" class="btn btn-light btn-lg" data-aos="fade-up" data-aos-delay="400">Começar Agora</a>
+        </div>
+    </section>
+
+    <!-- Adicionar após a seção de teoria -->
+    <section id="lessons" class="section">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Lições Estruturadas</h2>
+
+            <div class="row">
+                <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <span class="feature-icon"><i class="fas fa-guitar"></i></span>
+                            </div>
+                            <h4 class="card-title">Módulo 1: Introdução</h4>
+                            <p class="card-text">Aprenda os fundamentos da música, notas, e como ler partituras básicas.
+                            </p>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Conhecendo o braço do instrumento</li>
+                                <li class="list-group-item">Notas musicais e suas posições</li>
+                                <li class="list-group-item">Ritmo básico e contagem de tempos</li>
+                            </ul>
+                            <div class="text-center mt-3">
+                                <button class="btn btn-primary">Iniciar Módulo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <span class="feature-icon"><i class="fas fa-music"></i></span>
+                            </div>
+                            <h4 class="card-title">Módulo 2: Escalas e Acordes</h4>
+                            <p class="card-text">Domine as escalas principais e aprenda a formar acordes básicos.</p>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Escala maior e menor</li>
+                                <li class="list-group-item">Acordes maiores e menores</li>
+                                <li class="list-group-item">Progressões de acordes comuns</li>
+                            </ul>
+                            <div class="text-center mt-3">
+                                <button class="btn btn-primary">Iniciar Módulo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <span class="feature-icon"><i class="fas fa-sliders-h"></i></span>
+                            </div>
+                            <h4 class="card-title">Módulo 3: Técnicas Avançadas</h4>
+                            <p class="card-text">Aprimore sua técnica com exercícios avançados e conceitos musicais
+                                complexos.</p>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Improvisação e solo</li>
+                                <li class="list-group-item">Harmonia e contraponto</li>
+                                <li class="list-group-item">Leitura musical avançada</li>
+                            </ul>
+                            <div class="text-center mt-3">
+                                <button class="btn btn-primary">Iniciar Módulo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <button class="btn btn-outline-primary">Ver Todos os Módulos</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fretboard Section -->
+    <section id="fretboard-section" class="section">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Braço Interativo do Instrumento</h2>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="fretboard" id="fretboard"></div>
+                    <div class="visualizer" id="visualizer"></div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card p-4">
+                        <h4>Nota Atual</h4>
+                        <p class="fs-3" id="current-note">Selecione uma nota no braço</p>
+
+                        <h4 class="mt-4">Controles</h4>
+                        <div class="controls">
+                            <button id="show-notes" class="btn btn-primary">Mostrar Notas</button>
+                            <button id="show-c-major" class="btn btn-secondary">Escala C Maior</button>
+                            <button id="show-a-minor" class="btn btn-secondary">Acorde A Menor</button>
+                            <button id="show-pentatonic" class="btn btn-secondary">Pentatônica</button>
+                            <button id="clear-board" class="btn btn-outline-secondary">Limpar</button>
+                            <button id="play-note" class="btn btn-success">Tocar Nota</button>
+                            <button id="play-scale" class="btn btn-info">Tocar Escala</button>
+                        </div>
+
+                        <h4 class="mt-4">Instrumento</h4>
+                        <div class="instrument-selector">
+                            <label for="instrument-select" class="form-label">Selecionar Instrumento:</label>
+                            <select class="form-select" id="instrument-select" name="instrument">
+                                <option value="guitar">Violão</option>
+                                <option value="bass">Baixo</option>
+                                <option value="violin">Violino</option>
+                                <option value="cello">Violoncelo</option>
+                                <option value="ukulele">Ukulele</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Theory Section -->
+    <section id="theory" class="section section-dark">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Teoria Musical</h2>
+
+            <div class="row">
+                <div class="col-md-6" data-aos="fade-right">
+                    <div class="quiz-container">
+                        <h4>Quiz: Quantas notas tem uma escala maior?</h4>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="quiz-answer" id="quiz-option-1"
+                                value="5">
+                            <label class="form-check-label" for="quiz-option-1">5 notas</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="quiz-answer" id="quiz-option-2"
+                                value="7">
+                            <label class="form-check-label" for="quiz-option-2">7 notas</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="quiz-answer" id="quiz-option-3"
+                                value="12">
+                            <label class="form-check-label" for="quiz-option-3">12 notas</label>
+                        </div>
+
+                        <button id="quiz-submit" class="btn btn-primary mt-3">Verificar Resposta</button>
+
+                        <div id="quiz-feedback" class="mt-3"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6" data-aos="fade-left">
+                    <div class="card p-4 h-100">
+                        <h4>Círculo de Quintas</h4>
+                        <div class="circle-of-fifths">
+                            <div class="tone-circle"></div>
+                        </div>
+                        <p class="mt-3 text-center">Clique em uma nota para ver sua armadura de clave</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção de vídeos educativos -->
+    <section id="videos" class="section section-dark">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Demonstrações em Vídeo</h2>
+
+            <div class="row">
+                <div class="col-md-6 mb-4" data-aos="fade-right">
+                    <div class="ratio ratio-16x9">
+                        <iframe src="https://www.youtube.com/embed/jhYGXKqeb4I" title="Introdução ao Braço da Guitarra"
+                            allowfullscreen></iframe>
+                    </div>
+                    <h4 class="mt-3">Introdução ao Braço da Guitarra</h4>
+                    <p>Aprenda as partes do braço, nomes das cordas e como localizar notas.</p>
+                </div>
+
+                <div class="col-md-6 mb-4" data-aos="fade-left">
+                    <div class="ratio ratio-16x9">
+                        <iframe src="https://www.youtube.com/embed/rgaTLrZGlk0"
+                            title="Primeiros Acordes para Iniciantes" allowfullscreen></iframe>
+                    </div>
+                    <h4 class="mt-3">Primeiros Acordes para Iniciantes</h4>
+                    <p>Domine os acordes básicos e comece a tocar suas primeiras músicas.</p>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button class="btn btn-light">Mais Vídeos Educativos</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Practice Section -->
+    <section id="practice" class="section">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Pratique e Treine</h2>
+
+            <div class="row">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="card p-4 h-100">
+                        <h4>Metrônomo</h4>
+                        <div class="metronome-controls">
+                            <div class="mb-3">
+                                <label for="bpm-slider" class="form-label">Velocidade (BPM): <span
+                                        id="bpm-display">120</span></label>
+                                <input type="range" class="form-range" id="bpm-slider" name="bpm" min="40" max="240"
+                                    value="120" aria-describedby="bpm-help">
+                                <div id="bpm-help" class="form-text">Ajuste a velocidade do metrônomo</div>
+                            </div>
+
+                            <button id="metronome-toggle" class="btn btn-primary">
+                                <i class="fas fa-play me-2"></i>Iniciar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="card p-4 h-100">
+                        <h4>Treino Rítmico</h4>
+                        <div class="rhythm-grid" id="rhythm-grid"></div>
+                        <div class="d-flex gap-2 mt-3">
+                            <button id="play-rhythm" class="btn btn-primary flex-grow-1">Reproduzir Ritmo</button>
+                            <button id="clear-rhythm" class="btn btn-outline-secondary">Limpar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="card p-4 h-100">
+                        <h4>Sequência de Notas</h4>
+                        <p>Memorize e reproduza a sequência:</p>
+                        <div class="sequence-container">
+                            <div class="sequence-note" data-note="C">C</div>
+                            <div class="sequence-note" data-note="D">D</div>
+                            <div class="sequence-note" data-note="E">E</div>
+                            <div class="sequence-note" data-note="F">F</div>
+                            <div class="sequence-note" data-note="G">G</div>
+                            <div class="sequence-note" data-note="A">A</div>
+                            <div class="sequence-note" data-note="B">B</div>
+                        </div>
+                        <p class="mt-3">Sequência: <span id="current-sequence"></span></p>
+                        <div class="d-flex gap-2">
+                            <button id="play-sequence" class="btn btn-primary flex-grow-1">Nova Sequência</button>
+                            <button id="repeat-sequence" class="btn btn-outline-secondary">Repetir</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="card p-4 h-100">
+                        <h4>Treino de Intervalos</h4>
+                        <p>Ouça e identifique o intervalo:</p>
+                        <button id="play-interval" class="btn btn-primary w-100 mb-3">Reproduzir Intervalo</button>
+
+                        <div class="game-options">
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <div class="game-option btn btn-outline-primary w-100" data-interval="2M">2ª Maior
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <div class="game-option btn btn-outline-primary w-100" data-interval="3m">3ª Menor
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <div class="game-option btn btn-outline-primary w-100" data-interval="5P">5ª Justa
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <div class="game-option btn btn-outline-primary w-100" data-interval="7m">7ª Menor
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <span>Pontuação: </span>
+                            <span id="interval-game-score">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Games Section -->
+    <section id="games" class="section section-dark">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Jogos Musicais</h2>
+
+            <div class="row">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="card p-4 h-100">
+                        <h4>Identificação de Notas</h4>
+                        <p>Encontre esta nota no braço do instrumento:</p>
+                        <h3 class="text-center my-4" id="note-to-find">C</h3>
+                        <button id="new-note" class="btn btn-primary w-100">Nova Nota</button>
+                        <div class="mt-3">
+                            <span>Pontuação: </span>
+                            <span id="note-game-score">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="card p-4 h-100">
+                        <div class="container">
+                            <h1><i class="fas fa-guitar me-2"></i>Visualizador de Acordes Musicais</h1>
+                            <p class="lead">Selecione um acorde para visualizar seu diagrama</p>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="chord-selector">
+                                    <h4><i class="fas fa-list me-2"></i>Seletor de Acordes</h4>
+                                    <div class="mb-3">
+                                        <label for="chordType" class="form-label">Tipo de Acorde:</label>
+                                        <select class="form-select" id="chordType">
+                                            <option value="major">Maior</option>
+                                            <option value="minor">Menor</option>
+                                            <option value="7">Sétima</option>
+                                            <option value="m7">Menor Sétima</option>
+                                            <option value="maj7">Maior Sétima</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="chordRoot" class="form-label">Nota Base:</label>
+                                        <select class="form-select" id="chordRoot">
+                                            <option value="C">Dó</option>
+                                            <option value="C#">Dó#</option>
+                                            <option value="D">Ré</option>
+                                            <option value="D#">Ré#</option>
+                                            <option value="E">Mi</option>
+                                            <option value="F">Fá</option>
+                                            <option value="F#">Fá#</option>
+                                            <option value="G">Sol</option>
+                                            <option value="G#">Sol#</option>
+                                            <option value="A">Lá</option>
+                                            <option value="A#">Lá#</option>
+                                            <option value="B">Si</option>
+                                        </select>
+                                    </div>
+
+                                    <button id="showChord" class="btn btn-primary w-100">
+                                        <i class="fas fa-eye me-2"></i>Mostrar Acorde
+                                    </button>
+
+                                    <hr>
+
+                                    <h5>Acordes Frequentes:</h5>
+                                    <div class="chord-list">
+                                        <div class="chord-item" data-chord="C-major">Dó Maior (C)</div>
+                                        <div class="chord-item" data-chord="D-minor">Ré Menor (Dm)</div>
+                                        <div class="chord-item" data-chord="E-minor">Mi Menor (Em)</div>
+                                        <div class="chord-item" data-chord="F-major">Fá Maior (F)</div>
+                                        <div class="chord-item" data-chord="G-major">Sol Maior (G)</div>
+                                        <div class="chord-item" data-chord="A-minor">Lá Menor (Am)</div>
+                                        <div class="chord-item" data-chord="B-7">Si Sétima (B7)</div>
+                                        <div class="chord-item" data-chord="C-maj7">Dó Maior Sétima (Cmaj7)</div>
+                                        <div class="chord-item" data-chord="D-7">Ré Sétima (D7)</div>
+                                        <div class="chord-item" data-chord="G-7">Sol Sétima (G7)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-8">
+                                <div class="chord-diagram">
+                                    <div class="text-center" id="chordContainer">
+                                        <h3 id="chordName" class="mb-4">Selecione um acorde</h3>
+                                        <div id="fretboard" class="fretboard">
+                                            <!-- O diagrama do acorde será gerado aqui -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Como ler o
+                                                    diagrama</h5>
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item"><span class="note"
+                                                            style="display: inline-block; width: 25px; height: 25px;"></span>
+                                                        Nota pressionada</li>
+                                                    <li class="list-group-item"><span class="note open"
+                                                            style="display: inline-block; width: 25px; height: 25px;">O</span>
+                                                        Corda solta</li>
+                                                    <li class="list-group-item"><span class="note muted"
+                                                            style="display: inline-block; width: 25px; height: 25px;">X</span>
+                                                        Corda não tocada</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-music me-2"></i>Dica de Prática
+                                                </h5>
+                                                <p class="card-text">Comece com acordes simples como Dó Maior (C), Lá
+                                                    Menor (Am) e Mi Menor (Em). Pratique a transição suave entre eles.
+                                                </p>
+                                                <p class="card-text">Use um metrônomo para melhorar seu ritmo.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+    </section>
+
+    <!-- Tools Section -->
+    <section id="tools" class="section">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Ferramentas Úteis</h2>
+
+            <div class="row">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="card p-4 h-100">
+                        <div class="progression-controls">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="progression-style" class="form-label">Estilo:</label>
+                                    <select class="form-select" id="progression-style" name="progression_style">
+                                        <option value="pop">Pop</option>
+                                        <option value="rock">Rock</option>
+                                        <option value="jazz">Jazz</option>
+                                        <option value="blues">Blues</option>
+                                        <option value="classical">Clássico</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="progression-length" class="form-label">Comprimento:</label>
+                                    <select class="form-select" id="progression-length" name="progression_length">
+                                        <option value="4">4 acordes</option>
+                                        <option value="8">8 acordes</option>
+                                        <option value="12">12 acordes</option>
+                                        <option value="16">16 acordes</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button id="generate-progression" class="btn btn-primary mt-3">
+                                <i class="fas fa-random me-2"></i>Gerar Progressão
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="card p-4 h-100">
+                        <h4>Referência de Afinação</h4>
+                        <p>Clique para ouvir as notas de referência:</p>
+                        <div class="tuning-reference">
+                            <button class="btn btn-outline-primary interactive-btn" data-note="E2">E₂</button>
+                            <button class="btn btn-outline-primary interactive-btn" data-note="A2">A₂</button>
+                            <button class="btn btn-outline-primary interactive-btn" data-note="D3">D₃</button>
+                            <button class="btn btn-outline-primary interactive-btn" data-note="G3">G₃</button>
+                            <button class="btn btn-outline-primary interactive-btn" data-note="B3">B₃</button>
+                            <button class="btn btn-outline-primary interactive-btn" data-note="E4">E₄</button>
+                        </div>
+                        <div class="mt-4">
+                            <h5>Dicas de Afinação:</h5>
+                            <ul>
+                                <li>Use um ambiente silencioso</li>
+                                <li>Afine de baixo para cima</li>
+                                <li>Verifique a afinação regularmente</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5>Easy Strings</h5>
+                    <p>Aprenda música de forma interativa e divertida.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5>Links Rápidos</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#home" class="text-white">Início</a></li>
+                        <li><a href="#fretboard" class="text-white">Braço Interativo</a></li>
+                        <li><a href="#theory" class="text-white">Teoria Musical</a></li>
+                        <li><a href="#practice" class="text-white">Prática</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5>Conecte-se</h5>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="bg-light">
+            <p class="text-center mb-0">&copy; 2025 Easy Strings. Todos os direitos reservados a Nilson Gomes.</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script src="/settings/js/script.js"></script>
+</body>
+
+</html>
