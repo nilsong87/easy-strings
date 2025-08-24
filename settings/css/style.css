@@ -614,6 +614,7 @@ footer {
 
 
 
+/* ===== DIAGRAMA DE ACORDES - ESTILOS CORRIGIDOS ===== */
 .chord-diagram {
     display: flex;
     justify-content: center;
@@ -622,79 +623,125 @@ footer {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    position: relative;
-    margin-top: -50px;
+    margin: 20px 0;
+    min-height: 250px;
 }
 
 .chord-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     position: relative;
-    width: 120px;
-}
-
-.chord-selector {
-    margin-top: -50px;
-}
-
-.neck-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    width: 100%;
+    width: 180px;
     height: 200px;
-    background: #8b5a2b;
-    border: 4px solid #5d4037;
-    border-radius: 8px;
+}
+
+.neck {
     position: relative;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, #8b5a2b, #6b4423);
+    border: 3px solid #5d4037;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.string-line {
-    grid-row: 1 / -1;
-    width: 2px;
-    background: #ccc;
-    margin: 0 auto;
-}
-
-.fret-line {
-    grid-column: 1 / -1;
+.string {
+    position: absolute;
+    width: 100%;
     height: 2px;
-    background: #5d4037;
-    margin: 0 auto;
+    background: linear-gradient(to right, rgba(221, 221, 221, 0.2), #ddd, rgba(221, 221, 221, 0.2));
+    transform: translateY(-50%);
 }
+
+.string:nth-child(1) { top: 10%; }
+.string:nth-child(2) { top: 30%; }
+.string:nth-child(3) { top: 50%; }
+.string:nth-child(4) { top: 70%; }
+.string:nth-child(5) { top: 90%; }
+.string:nth-child(6) { top: 90%; } /* Para ukulele/baixo */
+
+.fret {
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background: #5d4037;
+}
+
+.fret:nth-child(1) { top: 0%; }
+.fret:nth-child(2) { top: 25%; }
+.fret:nth-child(3) { top: 50%; }
+.fret:nth-child(4) { top: 75%; }
+.fret:nth-child(5) { top: 100%; }
 
 .finger {
+    position: absolute;
+    width: 26px;
+    height: 26px;
     background: #e74c3c;
-    color: #fff;
+    color: white;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 28px;
-    height: 28px;
     font-weight: bold;
-    margin: auto;
+    font-size: 12px;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transform: translate(-50%, -50%);
 }
 
 .marker {
     position: absolute;
-    top: -25px;
-    font-weight: bold;
-    font-size: 14px;
-    color: #fff;
-    background: #27ae60;
     width: 18px;
     height: 18px;
+    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 50%;
+    font-weight: bold;
+    font-size: 12px;
+    color: white;
+    z-index: 10;
+}
+
+.marker[data-type="open"] {
+    background: #27ae60;
+}
+
+.marker[data-type="mute"] {
+    background: #e74c3c;
 }
 
 .chord-name {
-    margin-top: 8px;
-    font-size: 20px;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 18px;
     font-weight: bold;
     color: #2c3e50;
+}
+
+/* Para diferentes números de cordas */
+.chord-container[data-strings="4"] .string:nth-child(1) { top: 16.6%; }
+.chord-container[data-strings="4"] .string:nth-child(2) { top: 50%; }
+.chord-container[data-strings="4"] .string:nth-child(3) { top: 83.3%; }
+.chord-container[data-strings="4"] .string:nth-child(4),
+.chord-container[data-strings="4"] .string:nth-child(5),
+.chord-container[data-strings="4"] .string:nth-child(6) { display: none; }
+
+/* Estilo responsivo */
+@media (max-width: 768px) {
+    .chord-container {
+        width: 150px;
+        height: 170px;
+    }
+    
+    .finger {
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+    }
+    
+    .marker {
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+    }
 }

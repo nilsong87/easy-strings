@@ -1070,57 +1070,66 @@ function updateChordDiagram(chord) {
     };
 
     const chordConfig = chordPositions[chord] || chordPositions['C'];
-
+    const strings = chordConfig.frets.length;
+    
     const container = document.createElement('div');
     container.className = 'chord-container';
+    container.setAttribute('data-strings', strings);
 
+    // Criar braço do instrumento
     const neck = document.createElement('div');
     neck.className = 'neck';
-    container.appendChild(neck);
-
-    const neckWidth = 180;
-    const neckHeight = 200;
-    const stringSpacing = neckWidth / (6 - 1);
-    const fretSpacing = neckHeight / 4;
-    const fingerSize = 26;
-
+    
+    // Adicionar cordas
     for (let i = 0; i < 6; i++) {
         const string = document.createElement('div');
         string.className = 'string';
-        string.style.left = `${i * stringSpacing}px`;
         neck.appendChild(string);
     }
-
-    for (let i = 0; i <= 4; i++) {
+    
+    // Adicionar trastes
+    for (let i = 0; i < 5; i++) {
         const fret = document.createElement('div');
         fret.className = 'fret';
-        fret.style.top = `${i * fretSpacing}px`;
         neck.appendChild(fret);
     }
-
+    
+    // Adicionar dedos
     chordConfig.frets.forEach((fret, i) => {
         if (fret > 0) {
             const finger = document.createElement('div');
             finger.className = 'finger';
-            finger.style.left = `${(i * stringSpacing) - (fingerSize / 2)}px`;
-            finger.style.top = `${((fret - 1) * fretSpacing) + (fretSpacing / 2) - (fingerSize / 2)}px`;
+            
+            // Calcular posição (string e traste)
+            const stringPos = (i / (strings - 1)) * 100;
+            const fretPos = ((fret - 0.5) / 4) * 100;
+            
+            finger.style.left = `${stringPos}%`;
+            finger.style.top = `${fretPos}%`;
             finger.textContent = chordConfig.fingers[i];
             neck.appendChild(finger);
         }
     });
-
+    
+    // Adicionar marcadores de corda solta e corda não tocada
     chordConfig.frets.forEach((fret, i) => {
         if (fret === 0 || chordConfig.fingers[i] === 'x') {
             const marker = document.createElement('div');
             marker.className = 'marker';
-            marker.style.left = `${(i * stringSpacing) - 8}px`;
-            marker.style.top = `-24px`;
+            marker.setAttribute('data-type', fret === 0 ? 'open' : 'mute');
+            
+            const stringPos = (i / (strings - 1)) * 100;
+            marker.style.left = `${stringPos}%`;
+            marker.style.top = '-10%';
             marker.textContent = fret === 0 ? 'O' : 'X';
-            marker.style.background = fret === 0 ? '#27ae60' : '#e74c3c';
+            
             container.appendChild(marker);
         }
     });
 
+    container.appendChild(neck);
+    
+    // Adicionar nome do acorde
     const chordName = document.createElement('div');
     chordName.className = 'chord-name';
     chordName.textContent = chord;
