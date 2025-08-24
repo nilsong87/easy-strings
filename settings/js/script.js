@@ -99,6 +99,9 @@ function initApp() {
     } catch (error) {
         console.error('Erro na inicialização:', error);
     }
+    
+    // Inicializações estendidas
+    extendedInit();
 }
 
 // =============================================================================
@@ -1172,17 +1175,6 @@ function updateChordDiagram(chord) {
     chordDiagram.appendChild(container);
 }
 
-// Interação com select
-document.getElementById('chord-select').addEventListener('change', function () {
-    updateChordDiagram(this.value);
-});
-
-// Acorde inicial
-updateChordDiagram('C');
-
-
-
-
 function playChord(chord) {
     const audioContext = getAudioContext();
 
@@ -1564,23 +1556,6 @@ function addSafeEventListener(selector, event, handler) {
     }
 }
 
-// Função para carregar componentes dinamicamente
-function loadComponent(componentId, url) {
-    fetch(url)
-        .then(response => response.text())
-        .then(html => {
-            const element = document.getElementById(componentId);
-            if (element) {
-                element.innerHTML = html;
-                // Re-inicializar componentes após carregamento
-                initApp();
-            }
-        })
-        .catch(error => {
-            console.error(`Erro ao carregar componente ${componentId}:`, error);
-        });
-}
-
 // Função para debounce (evitar múltiplas execuções)
 function debounce(func, wait) {
     let timeout;
@@ -1650,6 +1625,8 @@ window.addEventListener('error', function(e) {
 
 // Observer para elementos que entram/saem da viewport
 function setupIntersectionObserver() {
+    if (!('IntersectionObserver' in window)) return;
+    
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -1911,35 +1888,46 @@ function showBrowserWarning() {
     document.body.appendChild(warning);
 }
 
-// Adicionar inicialização estendida ao carregamento principal
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', extendedInit);
-} else {
-    extendedInit();
+// Handler para erros não capturados em Promises
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Promise rejeitada não tratada:', event.reason);
+    event.preventDefault();
+});
+
+// =============================================================================
+// FALLBACKS PARA NAVEGADORES ANTIGOS
+// =============================================================================
+
+// Verificar e avisar sobre navegadores desatualizados
+function checkBrowserCompatibility() {
+    const isIE = /*@cc_on!@*/false || !!document.documentMode;
+    const isOldFirefox = typeof InstallTrigger !== 'undefined' && parseFloat(navigator.userAgent.match(/Firefox\/([0-9]+\.)/)[1]) < 60;
+    
+    if (isIE || isOldFirefox) {
+        showBrowserWarning('Seu navegador não é totalmente compatível. Recomendamos atualizar para uma versão mais recente.');
+    }
 }
 
-// =============================================================================
-// EXPORTAÇÃO PARA USO EXTERNO (se necessário)
-// =============================================================================
+function showBrowserWarning(message) {
+    const warning = document.createElement('div');
+    warning.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #ff9800;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        z-index: 10000;
+        font-weight: bold;
+    `;
+    warning.textContent = message;
+    document.body.appendChild(warning);
+}
 
-// Tornar funções principais disponíveis globalmente
-window.MusicTrainer = {
-    playTone,
-    playChord,
-    generateFretboard,
-    changeInstrument,
-    startMetronome: function(bpm) {
-        const bpmSlider = document.getElementById('bpm-slider');
-        if (bpmSlider) {
-            bpmSlider.value = bpm;
-            document.getElementById('bpm-display').textContent = `${bpm} BPM`;
-            if (AppState.metronome.isPlaying) {
-                clearInterval(AppState.metronome.intervalId);
-                startMetronome(bpm);
-            }
-        }
-    }
-};
+// Executar verificação de compatibilidade
+checkBrowserCompatibility();
 
 // =============================================================================
 // POLYFILLS PARA COMPATIBILIDADE
@@ -2004,7 +1992,7 @@ if (typeof Object.assign !== 'function') {
 }
 
 // =============================================================================
-// MANIPULAÇÃO DO SERVICE WORKER (PWA) - CÓDIGO CORRIGIDO
+// MANIPULAÇÃO DO SERVICE WORKER (PWA)
 // =============================================================================
 
 // Registrar Service Worker para funcionalidade offline
@@ -2408,38 +2396,3 @@ window.addEventListener('unhandledrejection', function(event) {
     console.error('Promise rejeitada não tratada:', event.reason);
     event.preventDefault();
 });
-
-// =============================================================================
-// FALLBACKS PARA NAVEGADORES ANTIGOS
-// =============================================================================
-
-// Verificar e avisar sobre navegadores desatualizados
-function checkBrowserCompatibility() {
-    const isIE = /*@cc_on!@*/false || !!document.documentMode;
-    const isOldFirefox = typeof InstallTrigger !== 'undefined' && parseFloat(navigator.userAgent.match(/Firefox\/([0-9]+\.)/)[1]) < 60;
-    
-    if (isIE || isOldFirefox) {
-        showBrowserWarning('Seu navegador não é totalmente compatível. Recomendamos atualizar para uma versão mais recente.');
-    }
-}
-
-function showBrowserWarning(message) {
-    const warning = document.createElement('div');
-    warning.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: #ff9800;
-        color: white;
-        padding: 10px;
-        text-align: center;
-        z-index: 10000;
-        font-weight: bold;
-    `;
-    warning.textContent = message;
-    document.body.appendChild(warning);
-}
-
-// Executar verificação de compatibilidade
-checkBrowserCompatibility();
