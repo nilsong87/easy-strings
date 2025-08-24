@@ -612,11 +612,11 @@ function setupCircleOfFifths() {
     const circle = document.querySelector('.tone-circle');
     if (!circle) return;
     
-    const notes = ['C', 'C#', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+    const notes = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Gb', 'C#', 'Db', 'G#', 'Ab', 'D#', 'Eb', 'A#', 'Bb', 'F'];
 
     // Position notes around the circle
     notes.forEach((note, index) => {
-        const angle = (index * 5) * (Math.PI / 360); // Convert to radians
+        const angle = (index * 30) * (Math.PI / 180); // Convert to radians
         const radius = 120; // Distance from center
 
         const noteElement = document.createElement('div');
@@ -1060,179 +1060,127 @@ function playInterval(interval) {
 // MÓDULO DE DIAGRAMA DE ACORDES
 // =============================================================================
 
-document.addEventListener('DOMContentLoaded', function() {
-            // Dados dos acordes (posições dos dedos)
-            const chordData = {
-                'C-major': {
-                    name: 'Dó Maior (C)',
-                    frets: [0, 3, 2, 0, 1, 0],
-                    fingers: ['X', '3', '2', 'X', '1', 'X']
-                },
-                'D-minor': {
-                    name: 'Ré Menor (Dm)',
-                    frets: [1, 3, 2, 0, 0, 0],
-                    fingers: ['1', '3', '2', 'X', 'X', 'X']
-                },
-                'E-minor': {
-                    name: 'Mi Menor (Em)',
-                    frets: [0, 0, 0, 2, 2, 0],
-                    fingers: ['O', 'O', 'O', '2', '3', 'O']
-                },
-                'F-major': {
-                    name: 'Fá Maior (F)',
-                    frets: [1, 1, 2, 3, 3, 1],
-                    fingers: ['1', '1', '2', '3', '4', '1']
-                },
-                'G-major': {
-                    name: 'Sol Maior (G)',
-                    frets: [3, 2, 0, 0, 0, 3],
-                    fingers: ['2', '1', 'O', 'O', 'O', '3']
-                },
-                'A-minor': {
-                    name: 'Lá Menor (Am)',
-                    frets: [0, 1, 2, 2, 0, 0],
-                    fingers: ['O', '1', '2', '3', 'O', 'O']
-                },
-                'B-7': {
-                    name: 'Si Sétima (B7)',
-                    frets: [2, 1, 2, 0, 2, 0],
-                    fingers: ['2', '1', '3', 'X', '4', 'X']
-                },
-                'C-maj7': {
-                    name: 'Dó Maior Sétima (Cmaj7)',
-                    frets: [0, 3, 2, 0, 0, 0],
-                    fingers: ['X', '3', '2', 'X', 'X', 'X']
-                },
-                'D-7': {
-                    name: 'Ré Sétima (D7)',
-                    frets: [2, 3, 2, 3, 0, 0],
-                    fingers: ['1', '3', '2', '4', 'X', 'X']
-                },
-                'G-7': {
-                    name: 'Sol Sétima (G7)',
-                    frets: [3, 2, 0, 0, 0, 1],
-                    fingers: ['3', '2', 'O', 'O', 'O', '1']
-                }
-            };
+function setupChordDiagram() {
+    const chordSelect = document.getElementById('chord-select');
+    const playChordBtn = document.getElementById('play-chord');
+    
+    if (!chordSelect || !playChordBtn) return;
+    
+    // Preencher o select com opções de acordes
+    const chords = ['C', 'Cm', 'C7', 'Cmaj7', 'G', 'D', 'A', 'E'];
+    chords.forEach(chord => {
+        const option = document.createElement('option');
+        option.value = chord;
+        option.textContent = chord;
+        chordSelect.appendChild(option);
+    });
 
-            // Elementos da interface
-            const chordContainer = document.getElementById('chordContainer');
-            const chordName = document.getElementById('chordName');
-            const fretboard = document.getElementById('fretboard');
-            const showChordButton = document.getElementById('showChord');
-            const chordItems = document.querySelectorAll('.chord-item');
+    // Atualizar diagrama de acorde quando a seleção mudar
+    chordSelect.addEventListener('change', function() {
+        updateChordDiagram(this.value);
+    });
 
-            // Gerar o braço da guitarra
-            function generateFretboard(chord) {
-                fretboard.innerHTML = '';
-                
-                // Adicionar labels das cordas
-                const strings = ['E', 'A', 'D', 'G', 'B', 'E'];
-                for (let i = 0; i < 6; i++) {
-                    const stringLabel = document.createElement('div');
-                    stringLabel.className = 'string-label';
-                    stringLabel.style.top = `${(i * 30) + 13}px`;
-                    stringLabel.textContent = strings[i];
-                    fretboard.appendChild(stringLabel);
-                }
-                
-                // Criar 5 trastes
-                for (let f = 0; f < 5; f++) {
-                    const fret = document.createElement('div');
-                    fret.className = 'fret';
-                    
-                    // Adicionar label do traste
-                    if (f > 0) {
-                        const fretLabel = document.createElement('div');
-                        fretLabel.className = 'fret-label';
-                        fretLabel.textContent = f;
-                        fret.appendChild(fretLabel);
-                    }
-                    
-                    // Adicionar cordas
-                    for (let s = 0; s < 6; s++) {
-                        const string = document.createElement('div');
-                        string.className = 'string';
-                        string.style.top = `${(s * 30) + 13}px`;
-                        fret.appendChild(string);
-                        
-                        // Adicionar notas se for o primeiro traste
-                        if (f === 0) {
-                            const noteValue = chord.frets[s];
-                            const note = document.createElement('div');
-                            note.className = 'note';
-                            note.style.top = `${(s * 30) + 5}px`;
-                            
-                            if (noteValue === 0) {
-                                note.className += ' open';
-                                note.textContent = 'O';
-                            } else if (noteValue === -1) {
-                                note.className += ' muted';
-                                note.textContent = 'X';
-                            } else if (noteValue === f) {
-                                note.textContent = chord.fingers[s];
-                            } else {
-                                note.style.visibility = 'hidden';
-                            }
-                            
-                            fret.appendChild(note);
-                        } else if (f === chord.frets[s]) {
-                            const note = document.createElement('div');
-                            note.className = 'note';
-                            note.style.top = `${(s * 30) + 5}px`;
-                            note.textContent = chord.fingers[s];
-                            fret.appendChild(note);
-                        }
-                    }
-                    
-                    fretboard.appendChild(fret);
-                }
-            }
+    // Atualização inicial
+    updateChordDiagram(chordSelect.value);
 
-            // Mostrar acorde selecionado
-            function showChord(chordKey) {
-                const chord = chordData[chordKey];
-                if (chord) {
-                    chordName.textContent = chord.name;
-                    generateFretboard(chord);
-                    
-                    // Ativar item na lista
-                    chordItems.forEach(item => {
-                        if (item.getAttribute('data-chord') === chordKey) {
-                            item.classList.add('active');
-                        } else {
-                            item.classList.remove('active');
-                        }
-                    });
-                }
-            }
+    // Configurar botão de tocar acorde
+    playChordBtn.addEventListener('click', function() {
+        const selectedChord = chordSelect.value;
+        playChord(selectedChord);
+    });
+}
 
-            // Evento para o botão "Mostrar Acorde"
-            showChordButton.addEventListener('click', function() {
-                const root = document.getElementById('chordRoot').value;
-                const type = document.getElementById('chordType').value;
-                const chordKey = `${root}-${type}`;
-                
-                // Verificar se temos dados para este acorde
-                if (chordData[chordKey]) {
-                    showChord(chordKey);
-                } else {
-                    chordName.textContent = "Acorde não encontrado";
-                    fretboard.innerHTML = '<p>Desculpe, este acorde não está disponível em nossa base de dados.</p>';
-                }
-            });
+function updateChordDiagram(chord) {
+    const chordDiagram = document.getElementById('chord-diagram');
+    if (!chordDiagram) return;
 
-            // Eventos para os itens da lista de acordes
-            chordItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    const chordKey = this.getAttribute('data-chord');
-                    showChord(chordKey);
-                });
-            });
+    chordDiagram.innerHTML = '';
 
-            // Mostrar um acorde inicial
-            showChord('C-major');
-        });
+    const chordPositions = {
+        'C': { frets: [0, 3, 2, 0, 1, 0], fingers: ['x', '3', '2', 'x', '1', 'x'] },
+        'Cm': { frets: [0, 3, 3, 0, 1, 0], fingers: ['x', '3', '4', 'x', '1', 'x'] },
+        'C7': { frets: [0, 3, 2, 3, 1, 0], fingers: ['x', '3', '2', '4', '1', 'x'] },
+        'Cmaj7': { frets: [0, 3, 2, 0, 0, 0], fingers: ['x', '2', '3', 'x', 'x', '1'] },
+        'G': { frets: [3, 2, 0, 0, 0, 3], fingers: ['2', '1', 'x', 'x', 'x', '3'] },
+        'D': { frets: [2, 3, 2, 0, 0, 0], fingers: ['2', '3', '1', 'x', 'x', 'x'] },
+        'A': { frets: [0, 0, 2, 2, 2, 0], fingers: ['x', 'x', '1', '2', '3', 'x'] },
+        'E': { frets: [0, 2, 2, 1, 0, 0], fingers: ['x', '3', '4', '2', 'x', '1'] }
+    };
+
+    const chordConfig = chordPositions[chord] || chordPositions['C'];
+
+    const container = document.createElement('div');
+    container.className = 'chord-container';
+
+    const neck = document.createElement('div');
+    neck.className = 'neck';
+    container.appendChild(neck);
+
+    const neckWidth = 180;
+    const neckHeight = 200;
+    const stringSpacing = neckWidth / (6 - 1); // 6 cordas → 5 espaços
+    const fretSpacing = neckHeight / 4;        // 4 trastes → 4 espaços
+    const fingerSize = 26;
+
+    // Cordas
+    for (let i = 0; i < 6; i++) {
+        const string = document.createElement('div');
+        string.className = 'string';
+        string.style.left = `${i * stringSpacing}px`;
+        neck.appendChild(string);
+    }
+
+    // Trastes
+    for (let i = 0; i <= 4; i++) {
+        const fret = document.createElement('div');
+        fret.className = 'fret';
+        fret.style.top = `${i * fretSpacing}px`;
+        neck.appendChild(fret);
+    }
+
+    // Dedos
+    chordConfig.frets.forEach((fret, i) => {
+        if (fret > 0) {
+            const finger = document.createElement('div');
+            finger.className = 'finger';
+            finger.style.left = `${(i * stringSpacing) - (fingerSize / 2)}px`;
+            finger.style.top = `${((fret - 1) * fretSpacing) + (fretSpacing / 2) - (fingerSize / 2)}px`;
+            finger.textContent = chordConfig.fingers[i];
+            neck.appendChild(finger);
+        }
+    });
+
+    // Marcadores O e X
+    chordConfig.frets.forEach((fret, i) => {
+        if (fret === 0 || chordConfig.fingers[i] === 'x') {
+            const marker = document.createElement('div');
+            marker.className = 'marker';
+            marker.style.left = `${(i * stringSpacing) - 8}px`;
+            marker.style.top = `-24px`;
+            marker.textContent = fret === 0 ? 'O' : 'X';
+            marker.style.background = fret === 0 ? '#27ae60' : '#e74c3c';
+            container.appendChild(marker);
+        }
+    });
+
+    // Nome do acorde
+    const chordName = document.createElement('div');
+    chordName.className = 'chord-name';
+    chordName.textContent = chord;
+    container.appendChild(chordName);
+
+    chordDiagram.appendChild(container);
+}
+
+// Interação com select
+document.getElementById('chord-select').addEventListener('change', function () {
+    updateChordDiagram(this.value);
+});
+
+// Acorde inicial
+updateChordDiagram('C');
+
+
 
 
 function playChord(chord) {
