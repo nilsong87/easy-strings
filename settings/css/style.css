@@ -623,6 +623,7 @@ footer {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     position: relative;
+    margin-top: -50px;
 }
 
 .chord-container {
@@ -631,6 +632,10 @@ footer {
     align-items: center;
     position: relative;
     width: 120px;
+}
+
+.chord-selector {
+    margin-top: -50px;
 }
 
 .neck-grid {
